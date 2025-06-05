@@ -22,7 +22,7 @@ function create_user(
     ) {
 
 
-$query = "INSERT INTO RBi_Realtors.rbi_realtors (
+$query = "INSERT INTO users (
     fname,
     lname,
     email,
