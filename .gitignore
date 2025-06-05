@@ -1,0 +1,8 @@
+# Environment Variables
+.env
+
+# Docker Files
+.dockerignore
+*.log
+*.swp
+.DS_Store
