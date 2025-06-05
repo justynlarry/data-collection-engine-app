@@ -1,0 +1,78 @@
+/* General Body Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #002e5b; /* Dark blue background */
+    color: #ffffff; /* White text color */
+    text-align: center;
+}
+
+/* Main Content Wrapper */
+.main-wrapper {
+    max-width: 600px;
+    margin: 100px auto;
+    background-color: #ffffff; /* White background */
+    color: #000000; /* Black text */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styles */
+header {
+    padding: 10px 20px;
+    background-color: #ffffff;
+    text-align: center;
+}
+
+header img {
+    max-width: 200px;
+}
+
+/* Thank You Message */
+.thank-you-message {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+/* Visit Link Styles */
+.visit-link {
+    font-size: 16px;
+    margin-top: 10px;
+    text-decoration: none;
+}
+
+.visit-link a {
+    color: #002e5b; /* Link matches the registration page */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.visit-link a:hover {
+    text-decoration: none;
+    color: #002fa7;
+}
+
+/* Footer Styles */
+footer {
+    margin-top: 50px;
+    font-size: 14px;
+    color: #ffffff;
+}
+
+/* Optional Button Styling */
+.button {
+    display: inline-block;
+    background-color: #002e5b;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.button:hover {
+    background-color: #004080;
+}
