@@ -1,5 +1,5 @@
 # data-collection-engine-app
-Web Page that accepts user inputs and stores the results in a MySQL Database
+Web Page that uses micro-services to accept user inputs and stores the results in a MySQL Database using MySQL, PHP, Nginx, and Docker.
 
 # File Structure:
 
