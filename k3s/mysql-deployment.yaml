@@ -27,6 +27,11 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: mysql-secret
+                key: MYSQL_DATABASE
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
                 key: MYSQL_USER
           - name: MYSQL_PASSWORD
             valueFrom:
@@ -34,11 +39,11 @@ spec:
                 name: mysql-secret
                 key: MYSQL_PASSWORD
         ports:
-          - containerPort: 3386
+          - containerPort: 3306
         volumeMounts:
         - name: mysql-persistent-storage
           mountPath: /var/lib/mysql
       volumes:
       - name: mysql-persistent-storage
         persistentVolumeClaim:
-          claimName: mysql-pvc 
+          claimName: mysql-pvc
