@@ -151,15 +151,7 @@ Contributions are welcome! If you have suggestions for improvements or find any 
 
 ---
 
-## 📧 Contact
-
-Your Name - your.email@example.com
-
-Project Link: [https://github.com/your-username/data-collection-engine-app](https://github.com/your-username/data-collection-engine-app)
-
----
-
-## 📧 Contact
+## Contact
 
 Justyn Larry - justynlarry@gmail.com
 Project Link: [https://github.com/jlarry77/data-collection-engine-app](https://github.com/jlarry77/data-collection-engine-app)
