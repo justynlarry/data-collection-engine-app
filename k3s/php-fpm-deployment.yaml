@@ -49,7 +49,7 @@ spec:
         volumeMounts:
         - name: app-code
           mountPath: /var/www/html
-          subPath: repo/html
+      #    subPath: repo/html
       volumes:
       - name: app-code
         emptyDir: {}

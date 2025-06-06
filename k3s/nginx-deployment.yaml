@@ -30,7 +30,7 @@ spec:
           volumeMounts:
             - name: app-code
               mountPath: /var/www/html # Mount the shared volume here for the app
-              subPath: repo/html # Point to the 'html' subdirectory within the cloned repo
+#              subPath: repo/html # Point to the 'html' subdirectory within the cloned repo
       volumes:
         - name: app-code
           emptyDir: {}
