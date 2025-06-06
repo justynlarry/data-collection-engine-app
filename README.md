@@ -78,7 +78,8 @@ Before you begin, ensure you have the following installed:
 
 # File Structure:
 
-`dc_engine/
+```
+dc_engine/
 │
 ├── docker/                       # Docker build context for services
 │   ├── nginx/                    # Nginx web server configuration
@@ -107,7 +108,8 @@ Before you begin, ensure you have the following installed:
 ├── .env                          # Environment Variables for Docker Compose (credentials and secrets)
 ├── docker-compose.yml            # Defines and configures multi-container Docker app
 ├── README.md                     # Project Documentation File
-└── .gitignore                    # Untracked files to ignore`
+└── .gitignore                    # Untracked files to ignore
+```
 
 # Use Case:
 ---
