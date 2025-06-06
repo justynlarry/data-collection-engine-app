@@ -6,3 +6,4 @@
 *.log
 *.swp
 .DS_Store
+/k3s/mysql-secret.yaml
