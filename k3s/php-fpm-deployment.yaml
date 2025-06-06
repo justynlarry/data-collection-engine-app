@@ -14,6 +14,14 @@ spec:
       labels:
         app: php-fpm
     spec:
+      initContainers:
+      - name: clone-app-code
+        image: alpine/git:latest
+        command: ["git", "clone", "https://github.com/jlarry77/data-collection-engine-app.git", "/app/repo"]
+        volumeMounts:
+        - name: app-code
+          mountPath: /app
+    spec:
       containers:
       - name: php-fpm
         image: my-php-fpm:latest
@@ -41,6 +49,7 @@ spec:
         volumeMounts:
         - name: app-code
           mountPath: /var/www/html
+          subPath: repo/html
       volumes:
       - name: app-code
         emptyDir: {}

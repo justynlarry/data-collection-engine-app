@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      initContainers: # This section will run BEFORE the main nginx container
+        - name: clone-app-code
+          image: alpine/git:latest # A lightweight image with Git installed
+          command: ["git", "clone", "https://github.com/jlarry77/data-collection-engine-app.git", "/app/repo"] # Clone the entire repo into /app/repo inside the volume
+          volumeMounts:
+            - name: app-code
+              mountPath: /app # Mount the shared volume here
+      containers:
+        - name: nginx
+          image: my-nginx:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80 # Nginx listens on port 80
+          volumeMounts:
+            - name: app-code
+              mountPath: /var/www/html # Mount the shared volume here for the app
+              subPath: repo/html # Point to the 'html' subdirectory within the cloned repo
+      volumes:
+        - name: app-code
+          emptyDir: {}

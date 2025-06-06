@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  labels:
+    app: nginx
+spec:
+  selector:
+    app: nginx
+  type: NodePort # This exposes the service on a port on your K3s node(s)
+  ports:
+    - protocol: TCP
+      port: 80       # Port the service exposes
+      targetPort: 80 # Port on the Nginx container
+      nodePort: 30080 # You can access this via your VM's IP:30080
