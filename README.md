@@ -79,6 +79,47 @@ Before you begin, ensure you have the following installed:
 # File Structure:
 
 dc_engine/
+├── docker
+│   ├── mysql
+│   │   └── init.sql
+│   ├── nginx
+│   │   └── default.conf
+│   └── php
+│       └── Dockerfile
+├── docker-compose.yml
+├── html
+│   ├── config.php
+│   ├── css
+│   │   ├── good_bye.css
+│   │   └── main.css
+│   ├── good_bye.php
+│   ├── images
+│   │   ├── blue-seal-bbb.png
+│   │   ├── cra-member.png
+│   │   ├── facebook-icon.png
+│   │   ├── Facebook-icon.png
+│   │   ├── insta_icon.jpg
+│   │   ├── linkedin-icon.png
+│   │   ├── linkedin-logo.png
+│   │   ├── RBi_logo_black_blue.png
+│   │   ├── RBi_logo_black_min.png
+│   │   ├── RBi_logo_blue.png
+│   │   ├── RBi_logo_BW.png
+│   │   └── twitter-icon.png
+│   ├── includes
+│   │   ├── dbh.inc.php
+│   │   ├── form_contr.inc.php
+│   │   ├── formhandler.inc.php
+│   │   └── form_model.inc.php
+│   ├── index.php
+│   └── main
+│       └── populateStates.js
+└── README.md
+
+
+
+
+
 │
 ├── docker/                       # Docker build context for services
 │   ├── nginx/                    # Nginx web server configuration
