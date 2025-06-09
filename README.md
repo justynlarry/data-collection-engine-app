@@ -22,6 +22,8 @@ This transformation serves as a practical learning exercise focused scalability,
 * **Isolation:** Services run in isolated environments, preventing dependency conflicts.
 * **Lightweight & Portable:** Reduced resource footprint compared to traditional VM deployments.
 * **Kubernetes Integration:** Designed for deployment on a Kubernetes cluster (specifically tested with K3s).
+* **Load Balancing:** Implemented using **MetalLB** for external service exposure in bare-metal K3s clusters.
+
 
 ---
 
@@ -92,6 +94,10 @@ Before you begin, ensure you have the following installed and configured:
 * **kubectl:** The Kubernetes command-line tool, configured to interact with your K3s cluster.
 * **Docker:** Still required locally to build container images before loading them into K3s.
 * **Git:** For cloning the repository.
+* * **Dedicated IP Address Range for MetalLB:** A range of IP addresses on your local network that MetalLB can assign to `LoadBalancer` services. This range must be:
+    * Outside your router's DHCP range.
+    * Within the same subnet as your K3s node(s).
+    * **Example:** If your K3s node is `192.168.1.100`, you might use `192.168.1.200-192.168.1.210`.
 
 ### Key Deployment Considerations (Important!)
 
@@ -103,7 +109,10 @@ Deploying containerized applications in Kubernetes often requires careful attent
 
 * **Nginx Root Directive:** Nginx's `root` directive in `docker/nginx/default.conf` *must* precisely match this consistent path (`/var/www/html/repo/html/`) to correctly serve the application's entry point (`index.php`) and other static assets.
 
-* **Service Exposure (NodePort):** The Nginx service is exposed via a `NodePort` (default `30080`) to allow external access to the web application from your host's IP address.
+### * **Service Exposure (NodePort):** The Nginx service is exposed via a `NodePort` (default `30080`) to allow external access to the web application from your host's IP address. -> **** THIS SERVICE DEPRECTATED WHEN METALLB WAS CONFIGURED ****
+
+* **Load Balancing with MetalLB:** The Nginx service is configured as `type: LoadBalancer`. MetalLB will automatically assign an external IP address from its configured pool, making the application accessible on that IP without needing to know NodePorts.
+
 
 ### Installation and Setup (K3s)
 
@@ -130,56 +139,71 @@ Deploying containerized applications in Kubernetes often requires careful attent
         ```
         (Replace `$MYSQL_ROOT_PASSWORD` etc. with the values from your `.env` file, or ensure they are in your shell environment.)
 
-3.  **Build and Load Docker Images for K3s:**
-    You need to build the Nginx and PHP-FPM Docker images locally and then load them into the K3s image store.
-
+3.  **Install and Configure MetalLB:**
     ```bash
-    # Build Nginx image
-    docker build -t my-nginx:latest docker/nginx/
+    # Create the metallb-system namespace
+    kubectl create namespace metallb-system
 
-    # Build PHP-FPM image
-    docker build -t my-php-fpm:latest docker/php/
+    # Apply the MetalLB manifests
+    kubectl apply -f [https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml](https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml)
 
-    # Load Nginx image into K3s
-    docker save my-nginx:latest | sudo k3s ctr images import -
-
-    # Load PHP-FPM image into K3s
-    docker save my-php-fpm:latest | sudo k3s ctr images import -
+    # Apply MetalLB IP address pool configuration (replace with your IP range!)
+    # Create k3s/metallb-ipaddress-pool.yaml with content below:
+    # ---
+    # apiVersion: metallb.io/v1beta1
+    # kind: IPAddressPool
+    # metadata:
+    #   name: default-pool
+    #   namespace: metallb-system
+    # spec:
+    #   addresses:
+    #     - 192.168.1.200-192.168.1.210 # <--- IMPORTANT: REPLACE THIS RANGE
+    # ---
+    # apiVersion: metallb.io/v1beta1
+    # kind: L2Advertisement
+    # metadata:
+    #   name: default-advertisement
+    #   namespace: metallb-system
+    # spec:
+    #   ipAddressPools:
+    #     - default-pool
+    kubectl apply -f k3s/metallb-ipaddress-pool.yaml
     ```
 
-4.  **Deploy Kubernetes Manifests:**
-    Navigate to the `k3s/` directory and apply all the Kubernetes manifest files. The deployment order matters for dependencies (for example, secrets before deployments).
+4.  **Build and Push Docker Images to Docker Hub:**
+    These images will be pulled by K3s during deployment. **Remember to replace `yourusername` with your actual Docker Hub username.**
+    ```bash
+    # Build and push Nginx image
+    docker build -t yourusername/my-nginx:latest docker/nginx/
+    docker push yourusername/my-nginx:latest
+
+    # Build and push PHP-FPM image
+    docker build -t yourusername/my-php-fpm:latest docker/php/
+    docker push yourusername/my-php-fpm:latest
+    ```
+
+5.  **Deploy Kubernetes Manifests:**
+    Apply all the Kubernetes manifest files from the `k3s/` directory.
 
     ```bash
     cd k3s/
-    kubectl apply -f mysql-secret.yaml
-    kubectl apply -f mysql-pvc.yaml
-    kubectl apply -f mysql-deployment.yaml
-    kubectl apply -f mysql-service.yaml
-    kubectl apply -f php-fpm-deployment.yaml
-    kubectl apply -f php-fpm-service.yaml
-    kubectl apply -f nginx-deployment.yaml
-    kubectl apply -f nginx-service.yaml
+    kubectl apply -f .
     cd .. # Go back to root directory
     ```
 
-5.  **Verify Pod Status:**
-    Ensure all pods are running:
+6.  **Verify Pod and Service Status:**
+    Ensure all pods are running and Nginx service has an external IP:
     ```bash
     kubectl get pods
+    kubectl get svc nginx-service -o wide
     ```
-    You should see `mysql-deployment`, `nginx-deployment`, and `php-fpm-deployment` pods in `Running` status.
+    Look for the `EXTERNAL-IP` for `nginx-service`; this will be the address provided by MetalLB.
 
-6.  **Access the Application:**
-    The Nginx service is exposed via a `NodePort`. Find the IP address of your K3s node and the exposed NodePort (default 30080).
-    * **Get Node IP:** `hostname -I` (on your K3s node) or `kubectl get nodes -o wide`
-    * **Get Nginx NodePort:** `kubectl get svc nginx-service -o jsonpath='{.spec.ports[0].nodePort}'` (will typically be `30080`)
-
-    Then, open your web browser and navigate to:
+7.  **Access the Application:**
+    Open your web browser and navigate to the MetalLB assigned IP address:
     ```
-    http://<Your_K3s_Node_IP_Address>:30080
+    http://<MetalLB_Assigned_IP_Address>
     ```
-
 
 # File Structure:
 
@@ -215,14 +239,17 @@ dc_engine/
 ├── README.md                     # Project Documentation File
 ├── .gitignore                    # Untracked files to ignore
 └── k3s/
-    ├── mysql-deployment.yaml     # Defines the MySQL Pod and its configuration
-    ├── mysql-pvc.yaml            # Defines a Persistent Volume Claim for MySQL Data
-    ├── mysql-secret.yaml         # Stores sensitive MySQL credentials securely
-    ├── mysql-service.yaml        # Exposes the MySQL database within the cluster
-    ├── nginx-deployment.yaml     # Defines the Nginx Pod, including initContianer for code cloning
-    ├── nginx-service.yaml        # Exposes the Nginx web server via NodePort  
-    ├── php-fpm-deployment.yaml   # Defines teh PHP-FPM Pod, including initContainer for code cloning
-    └── php-fpm-service.yaml      # Exposes the PHP-FPM service to Nginx
+    ├── mysql-deployment.yaml         # Defines the MySQL Pod and its configuration
+    ├── mysql-pvc.yaml                # Defines a Persistent Volume Claim for MySQL Data
+    ├── mysql-secret.yaml             # Stores sensitive MySQL credentials securely
+    ├── mysql-service.yaml            # Exposes the MySQL database within the cluster
+    ├── nginx-deployment.yaml         # Defines the Nginx Pod, including initContianer for code cloning
+    ├── nginx-service.yaml            # Exposes the Nginx web server via NodePort  
+    ├── php-fpm-deployment.yaml       # Defines teh PHP-FPM Pod, including initContainer for code cloning
+    └── php-fpm-service.yaml          # Exposes the PHP-FPM service to Nginx
+    └── metallb-ipaddress-pool.yaml   # MetalLB IP address pool configuration
+
+
 ```
 
 # Use Case:
@@ -230,13 +257,14 @@ dc_engine/
 
 ## 🛠️ Usage
 
-After starting the Docker containers:
+After starting the Docker containers (for Docker Compose) or deploying to K3s:
 
-1.  Navigate to `http://localhost` in your web browser. (
-2.  Fill out the data collection form with realtor information.
-3.  Submit the form. The data will be stored in the MySQL database.
-4.  *(Optional: If you have a way to view the collected data, mention it here, e.g., via a separate admin interface or by connecting to the database.)*
-
+1.  **For Docker Compose:** Navigate to `http://localhost` in your web browser.
+2.  **For K3s (MetalLB):** Navigate to the IP address assigned by MetalLB (e.g., `http://192.168.1.200`) in your web browser.
+3.  Fill out the data collection form with realtor information.
+4.  Submit the form. The data will be stored in the MySQL database.
+5.  *(Optional: If you have a way to view the collected data, mention it here, e.g., via a separate admin interface or by connecting to the database.)*
+   
 ---
 
 ## Management
@@ -347,4 +375,7 @@ Project Link: [https://github.com/jlarry77/data-collection-engine-app](https://g
 * [PHP Documentation](https://www.php.net/docs.php)
 * [Nginx Documentation](https://nginx.org/en/docs/)
 * [MySQL Documentation](https://dev.mysql.com/doc/)
+* [K3s Documentation](https://k3s.io/docs/)
+* [Kubernetes Documentation](https://kubernetes.io/docs/)
+* [MetalLB Documentation](https://metallb.universe.tf/concepts/)
 
