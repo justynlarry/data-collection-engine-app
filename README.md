@@ -365,7 +365,7 @@ Contributions are welcome! If you have suggestions for improvements or find any 
 ## Contact
 
 Justyn Larry - justynlarry@gmail.com
-Project Link: [https://github.com/jlarry77/data-collection-engine-app](https://github.com/jlarry77/data-collection-engine-app)
+Project Link: [https://github.com/jlarry77/data-collection-engine-app](https://github.com/justynlarry/data-collection-engine-app)
 
 ---
 
