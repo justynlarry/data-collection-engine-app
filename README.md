@@ -9,7 +9,7 @@
 # Project Overview
 Originally hosted on a home system using Apache and exposed via a Cloudflare Tunnel, the application served a crucial role in **gathering real estate agent data for a local roofing company**, storing it in a MySQL database for marketing purposes.
 
-#Purpose:
+# Purpose:
 This transformation serves as a practical learning exercise focused scalability, isolation, portability, lightweight deployment, and hardware independence for web applications, extending from Docker Compose to Kubernetes (K3s) environment.  Creating distinct services (Nginx, PHP-FPM, MySQL) demostrates the advantages of containerization and microservices principles over monolithic applications.
 
 ## Features
